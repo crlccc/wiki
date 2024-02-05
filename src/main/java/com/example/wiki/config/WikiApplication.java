@@ -18,12 +18,8 @@ public class WikiApplication {
         Environment env = app.run(args).getEnvironment();
 
         log.info("启动成功！");
-        log.info("Access URLs:\n----------------------------------------------------------\n\t" +
-                "Local: \t\t\thttp://localhost:127.0.0.1:{}\n\t" +
-                "External: \t\thttp://{}:{}\n----------------------------------------------------------",
-                env.getProperty("server.port"),
-                env.getProperty("server.address"),
-                env.getProperty("server.port"));;
+        log.info("Local: \t\thttp://localhost:127.0.0.1:{}",env.getProperty("server.port"));
+
     }
 
 }
