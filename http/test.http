@@ -2,6 +2,8 @@ GET http://localhost:8080/hello
 Accept: application/json
 
 
+
+
 #> {%
 #     client.test("test-hello", function() {
 #       client.log("测试/hello接口");
@@ -11,5 +13,6 @@ Accept: application/json
 #       client.assert(response.body === "Hello World", "结果验证失败");
 #     });
 #%}
+
 
 ###
