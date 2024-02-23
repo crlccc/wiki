@@ -74,7 +74,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from 'vue';
+import {defineComponent, onMounted, ref} from 'vue';
 import {
   LaptopOutlined,
   LikeOutlined,
@@ -87,18 +87,18 @@ import axios from "axios";
 import defaultProps from "ant-design-vue/es/vc-slick/default-props";
 import responsive = defaultProps.responsive;
 
-const listData: any = [];
+// const listData: any = [];
 
 
-for (let i = 0; i < 23; i++) {
-  listData.push({
-    href: 'https://www.antdv.com/',
-    title: `ant design vue part ${i}`,
-    avatar: 'https://joeschmoe.io/api/v1/random',
-    description:
-        'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-  });
-}
+// for (let i = 0; i < 23; i++) {
+//   listData.push({
+//     href: 'https://www.antdv.com/',
+//     title: `ant design vue part ${i}`,
+//     avatar: 'https://joeschmoe.io/api/v1/random',
+//     description:
+//         'Ant Design, a design language for background applications, is refined by Ant UED Team.',
+//   });
+// }
 
 export default defineComponent({
   name: 'Home',
@@ -107,15 +107,24 @@ export default defineComponent({
   },
   setup() {
     const ebooks = ref();
-    axios.get("/ebook/list").then((response) => {
-      const data = response.data;
-      ebooks.value = data.content;
+
+    onMounted(() => {
+      console.log('onMounted');
+      axios.get("/ebook/list",{
+        params:{
+          page: 1,
+          size:1000
+        }
+      }).then((response) => {
+        const data = response.data;
+        ebooks.value = data.content.list;
+      });
     });
+
     return {
       ebooks,
       selectedKeys2: ref(['1']),
       openKeys: ref(['sub1']),
-      listData,
       pagination : {
         onChange: (page: any) => {
           console.log(page);
