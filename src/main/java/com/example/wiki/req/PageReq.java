@@ -1,21 +1,26 @@
 package com.example.wiki.req;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
+
 import java.util.Optional;
 
+@Validated
 public class PageReq {
-    private int page;
 
+    @NotNull(message = "【页码】不能为空")
+    private int page;
+    @NotNull(message = "【页码】不能为空")
+    @Max(value = 1000, message = "【每页条数】不能超过1000")
     private int size;
 
     /**
      * 默认当前页码为1，每页显示10条
      */
-    public PageReq() {
-        this.page = 1;
-        this.size = 10;
-    }
+
     public int getPage() {
-        return Optional.ofNullable(page).orElse(1);
+        return page;
     }
 
     public void setPage(int page) {
@@ -23,7 +28,7 @@ public class PageReq {
     }
 
     public int getSize() {
-        return Optional.ofNullable(size).orElse(10);
+        return size;
     }
 
     public void setSize(int size) {
