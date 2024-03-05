@@ -25,22 +25,20 @@
           :pagination="false"
       >
         <template #cover="{ text: cover }">
-          <img v-if="cover" :src="cover" alt="avatar" />
+          <img v-if="cover" :src="cover" alt="avatar"/>
         </template>
         <template v-slot:action="{ text, record }">
           <a-space size="small">
             <a-button type="primary" @click="edit(record)">
               编辑
             </a-button>
-
-
             <a-popconfirm
                 title="删除不可恢复，是否确认删除？"
                 ok-text="是"
                 cancel-text="否"
                 @confirm="handleDelete(record.id)"
             >
-              <a-button type="danger">
+              <a-button type="primary" danger>
                 删除
               </a-button>
             </a-popconfirm>
@@ -58,20 +56,27 @@
   >
     <a-form :model="category" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
       <a-form-item label="名称">
-        <a-input v-model:value="category.name" />
+        <a-input v-model:value="category.name"/>
       </a-form-item>
       <a-form-item label="父分类">
-        <a-input v-model:value="category.parent" />
+        <a-input v-model:value="category.parent"/>
+        <a-select
+            ref="select"
+            v-model:value="category.parent"
+        >
+          <a-select-option value="0">无</a-select-option>
+          <a-select-option v-for="c in level1" :value="c.id" :key="c.id" :disabled="category.id === c.id">{{c.name}}</a-select-option>
+        </a-select>
       </a-form-item>
       <a-form-item label="顺序">
-        <a-input v-model:value="category.sort" />
+        <a-input v-model:value="category.sort"/>
       </a-form-item>
     </a-form>
   </a-modal>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import {defineComponent, onMounted, ref} from 'vue';
 import axios from 'axios';
 import defaultProps from "ant-design-vue/es/vc-slick/default-props";
 import responsive = defaultProps.responsive;
@@ -85,7 +90,6 @@ export default defineComponent({
 
     const param = ref();
     param.value = {}
-
 
 
     const loading = ref(false);
@@ -107,7 +111,7 @@ export default defineComponent({
       {
         title: 'Action',
         key: 'action',
-        slots: { customRender: 'action' }
+        slots: {customRender: 'action'}
       }
     ];
 
@@ -121,12 +125,12 @@ export default defineComponent({
       axios.get("/category/all").then((response) => {
         loading.value = false;
         const data = response.data;
-        if (data.success){
+        if (data.success) {
           categorys.value = data.content;
           level1.value = [];
-          level1.value = Tool.array2Tree(data.content,0);
+          level1.value = Tool.array2Tree(data.content, 0);
 
-        }else {
+        } else {
           message.error(data.message);
         }
 
@@ -140,16 +144,16 @@ export default defineComponent({
     const modalLoading = ref(false);
     const handleModalOk = () => {
       modalLoading.value = true;
-      axios.post("/category/save",category.value).then((response) => {
+      axios.post("/category/save", category.value).then((response) => {
         modalLoading.value = false;
         const data = response.data;//data=commonResp
-        if (data.success){
+        if (data.success) {
           modalVisible.value = false;
 
 
           //重新加载数据
           handleQuery();
-        }else {
+        } else {
           message.error(data.message);
         }
       });
@@ -172,11 +176,11 @@ export default defineComponent({
       category.value = {}
     };
 
-    const handleDelete = (id:number) =>{
-      axios.delete("/category/delete/"+ id).then((response) => {
+    const handleDelete = (id: number) => {
+      axios.delete("/category/delete/" + id).then((response) => {
         const data = response.data;//data=commonResp
 
-        if (data.success){
+        if (data.success) {
 
           //重新加载数据
           handleQuery();
