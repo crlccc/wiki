@@ -20,7 +20,7 @@
       <a-table
           :columns="columns"
           :row-key="record => record.id"
-          :data-source="categorys"
+          :data-source="level1"
           :loading="loading"
           :pagination="false"
       >
@@ -114,6 +114,8 @@ export default defineComponent({
     /**
      * 数据查询
      **/
+
+    const level1 = ref(); //一级分类树，children属性就是二级分类
     const handleQuery = () => {
       loading.value = true;
       axios.get("/category/all").then((response) => {
@@ -121,6 +123,8 @@ export default defineComponent({
         const data = response.data;
         if (data.success){
           categorys.value = data.content;
+          level1.value = [];
+          level1.value = Tool.array2Tree(data.content,0);
 
         }else {
           message.error(data.message);
@@ -189,6 +193,7 @@ export default defineComponent({
       categorys,
       columns,
       loading,
+      level1,
 
       edit,
       add,
