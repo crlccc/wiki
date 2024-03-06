@@ -6,49 +6,30 @@
           v-model:openKeys="openKeys"
           mode="inline"
           :style="{ height: '100%', borderRight: 0 }"
+          @click="handleClick"
       >
-        <a-sub-menu key="sub1">
-          <template #title>
+        <a-menu-item key="welcome">
+          <MailOutlined/>
+          <span>欢迎</span>
+        </a-menu-item>
+        <a-sub-menu v-for="item in level1" :key="item.id" >
+          <template v-slot:title>
               <span>
                 <user-outlined/>
-                subnav 1
+                {{ item.name }}
               </span>
           </template>
-          <a-menu-item key="1">option1</a-menu-item>
-          <a-menu-item key="2">option2</a-menu-item>
-          <a-menu-item key="3">option3</a-menu-item>
-          <a-menu-item key="4">option4</a-menu-item>
-        </a-sub-menu>
-        <a-sub-menu key="sub2">
-          <template #title>
-              <span>
-                <laptop-outlined/>
-                subnav 2
-              </span>
-          </template>
-          <a-menu-item key="5">option5</a-menu-item>
-          <a-menu-item key="6">option6</a-menu-item>
-          <a-menu-item key="7">option7</a-menu-item>
-          <a-menu-item key="8">option8</a-menu-item>
-        </a-sub-menu>
-        <a-sub-menu key="sub3">
-          <template #title>
-              <span>
-                <notification-outlined/>
-                subnav 3
-              </span>
-          </template>
-          <a-menu-item key="9">option9</a-menu-item>
-          <a-menu-item key="10">option10</a-menu-item>
-          <a-menu-item key="11">option11</a-menu-item>
-          <a-menu-item key="12">option12</a-menu-item>
+          <a-menu-item v-for="child in item.children" :key="child.id">{{ child.name }}</a-menu-item>
         </a-sub-menu>
       </a-menu>
     </a-layout-sider>
     <a-layout-content
         :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
     >
-      <a-list item-layout="vertical" size="large" :grid="{ gutter: 50, column: 3 }" :data-source="ebooks">
+      <div class="welcome" v-show="isShowWelcome">
+        <h1>欢迎使用大菜狗的知识网站</h1>
+      </div>
+      <a-list v-show="!isShowWelcome" item-layout="vertical" size="large" :grid="{ gutter: 50, column: 3 }" :data-source="ebooks" >
         <template #renderItem="{ item }">
           <a-list-item key="item.name">
             <template #actions>
@@ -86,19 +67,9 @@ import {
 import axios from "axios";
 import defaultProps from "ant-design-vue/es/vc-slick/default-props";
 import responsive = defaultProps.responsive;
+import {Tool} from "@/util/tool";
+import {message} from "ant-design-vue";
 
-// const listData: any = [];
-
-
-// for (let i = 0; i < 23; i++) {
-//   listData.push({
-//     href: 'https://www.antdv.com/',
-//     title: `ant design vue part ${i}`,
-//     avatar: 'https://joeschmoe.io/api/v1/random',
-//     description:
-//         'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-//   });
-// }
 
 export default defineComponent({
   name: 'Home',
@@ -107,37 +78,87 @@ export default defineComponent({
   },
   setup() {
     const ebooks = ref();
+    let categoryId2 = 0;
 
-    onMounted(() => {
-      console.log('onMounted');
-      axios.get("/ebook/list",{
-        params:{
+
+
+
+
+    const handleQueryEbook = () => {
+      axios.get("/ebook/list", {
+        params: {
           page: 1,
-          size:1000
+          size: 1000,
+          categoryId2:categoryId2
         }
       }).then((response) => {
         const data = response.data;
         ebooks.value = data.content.list;
       });
+    }
+
+
+    /**
+     * 查询所有分类
+     */
+    const level1 = ref();
+    let categorys: any;
+    const handleQueryCategory = () => {
+      axios.get("/category/all").then((response) => {
+        const data = response.data;
+        if (data.success) {
+          categorys = data.content;
+          level1.value = [];
+          level1.value = Tool.array2Tree(data.content, 0);
+
+        } else {
+          message.error(data.message);
+        }
+
+      });
+    };
+
+
+    const isShowWelcome = ref(true);
+    const handleClick = (value: any) => {
+      // console.log("menu click")
+      if (value.key === "welcome") {
+        isShowWelcome.value = true;
+      }else {
+        categoryId2 = value.key;
+        isShowWelcome.value = false;
+        handleQueryEbook();
+      }
+      // isShowWelcome.value = value.key === 'welcome';
+    };
+
+
+    onMounted(() => {
+      handleQueryCategory();
+      // console.log('onMounted');
     });
 
     return {
       ebooks,
+      level1,
+      handleClick,
+      isShowWelcome,
+
       selectedKeys2: ref(['1']),
       openKeys: ref(['sub1']),
-      pagination : {
+      pagination: {
         onChange: (page: any) => {
           console.log(page);
         },
         pageSize: 3,
       },
       actions: [
-      {icon: StarOutlined, text: '156'},
-      {icon: LikeOutlined, text: '156'},
-      {icon: MessageOutlined, text: '12'},
-    ],
-  }
-    ;
+        {icon: StarOutlined, text: '156'},
+        {icon: LikeOutlined, text: '156'},
+        {icon: MessageOutlined, text: '12'},
+      ],
+    }
+        ;
   }
 });
 
