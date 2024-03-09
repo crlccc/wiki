@@ -82,16 +82,16 @@
 <script lang="ts">
 import {defineComponent, onMounted, ref} from 'vue';
 import axios from 'axios';
-import defaultProps from "ant-design-vue/es/vc-slick/default-props";
-import responsive = defaultProps.responsive;
 import {message} from "ant-design-vue";
 import {Tool} from "@/util/tool";
+import {useRoute} from "vue-router";
 
 export default defineComponent({
   name: 'AdminDoc',
   setup() {
     const docs = ref();
 
+    const router = useRoute()
     const param = ref();
     param.value = {}
 
@@ -212,7 +212,9 @@ export default defineComponent({
      */
     const add = () => {
       modalVisible.value = true;
-      doc.value = {}
+      doc.value = {
+        ebookId:router.query.ebookId,
+      };
       treeSelectData.value = Tool.copy(level1.value)
       treeSelectData.value.unshift({id: 0, name: '无'})
 
