@@ -4,6 +4,7 @@ public class CategoryQueryReq extends PageReq {
 
     private String name;
 
+
     public String getName() {
         return name;
     }

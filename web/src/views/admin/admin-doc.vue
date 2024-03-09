@@ -59,14 +59,18 @@
         <a-input v-model:value="doc.name"/>
       </a-form-item>
       <a-form-item label="父文档">
-        <a-input v-model:value="doc.parent"/>
-        <a-select
-            ref="select"
+        <a-tree-select
             v-model:value="doc.parent"
+            show-search
+            style="width: 100%"
+            :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+            placeholder="请选择父文档"
+            allow-clear
+            tree-default-expand-all
+            :tree-data="treeSelectData"
+            :fieldNames="{label :'name', key: 'id',value: 'id'}"
         >
-          <a-select-option value="0">无</a-select-option>
-          <a-select-option v-for="c in level1" :value="c.id" :key="c.id" :disabled="doc.id === c.id">{{c.name}}</a-select-option>
-        </a-select>
+        </a-tree-select>
       </a-form-item>
       <a-form-item label="顺序">
         <a-input v-model:value="doc.sort"/>
@@ -139,6 +143,11 @@ export default defineComponent({
 
 
     // -------- 表单 ---------
+
+    // 因为树选择组件的属性状态，会随当前编辑的节点而变化，所以单独声明一个响应式变量
+    const treeSelectData = ref();
+    treeSelectData.value = [];
+
     const doc = ref({});
     const modalVisible = ref(false);
     const modalLoading = ref(false);
@@ -160,12 +169,42 @@ export default defineComponent({
     };
 
     /**
+     *将某一节点的子节点增加disabled属性
+     */
+    const setDisabled = (treeSelectData: any, id: any) => {
+      for (let i = 0; i < treeSelectData.length; i++) {
+        const node = treeSelectData[i];
+        if (node.id == id) {
+          node.disabled = true;
+
+          const children = node.children;
+          if (Tool.isEmpty(children)) {
+            for (let j=0;j<children.length;j++) {
+              setDisabled(children,children[j].id);
+            }
+          }
+        }else {
+          const children = node.children;
+          if (Tool.isEmpty(children)) {
+            setDisabled(children, id);
+          }
+        }
+      }
+    };
+
+
+    /**
      * 编辑
      */
     const edit = (record: any) => {
       modalVisible.value = true;
       doc.value = record
       doc.value = Tool.copy(record);
+
+      treeSelectData.value = Tool.copy(level1.value)
+      setDisabled(treeSelectData.value, record.id);
+
+      treeSelectData.value.unshift({id: 0, name: '无'})
     };
 
     /**
@@ -174,6 +213,9 @@ export default defineComponent({
     const add = () => {
       modalVisible.value = true;
       doc.value = {}
+      treeSelectData.value = Tool.copy(level1.value)
+      treeSelectData.value.unshift({id: 0, name: '无'})
+
     };
 
     const handleDelete = (id: number) => {
@@ -187,6 +229,7 @@ export default defineComponent({
         }
       });
     }
+
 
     onMounted(() => {
       handleQuery();
@@ -207,6 +250,7 @@ export default defineComponent({
       modalLoading,
       handleModalOk,
       handleDelete,
+      treeSelectData
 
     }
   }
