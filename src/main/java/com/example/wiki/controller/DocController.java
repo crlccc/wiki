@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -25,14 +26,15 @@ public class DocController {
 
     @GetMapping("/all")
     public CommonResp all() {
-        CommonResp<List<DocQueryResp>>  resp = new CommonResp<>();
+        CommonResp<List<DocQueryResp>> resp = new CommonResp<>();
         List<DocQueryResp> list = docService.all();
         resp.setContent(list);
         return resp;
     }
+
     @GetMapping("/list")
     public CommonResp list(@Valid DocQueryReq req) {
-        CommonResp<PageResp<DocQueryResp>>  resp = new CommonResp<>();
+        CommonResp<PageResp<DocQueryResp>> resp = new CommonResp<>();
         PageResp<DocQueryResp> list = docService.list(req);
         resp.setContent(list);
         return resp;
@@ -45,10 +47,13 @@ public class DocController {
         return resp;
     }
 
-    @DeleteMapping("/delete/{id}")
-    public CommonResp delete(@PathVariable long id) {
+    @DeleteMapping("/delete/{idsStr}")
+    public CommonResp delete(@PathVariable String idsStr) {
         CommonResp resp = new CommonResp<>();
-        docService.delete(id);
+        if (idsStr != null) {
+            List<String> list = Arrays.asList(idsStr.split(","));
+            docService.delete(list);
+        }
         return resp;
     }
 

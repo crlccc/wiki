@@ -80,11 +80,12 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, onMounted, ref} from 'vue';
+import {createApp, createVNode, defineComponent, onMounted, ref} from 'vue';
 import axios from 'axios';
-import {message} from "ant-design-vue";
+import {message, Modal} from "ant-design-vue";
 import {Tool} from "@/util/tool";
 import {useRoute} from "vue-router";
+import {ExclamationCircleOutlined} from "@ant-design/icons-vue";
 
 export default defineComponent({
   name: 'AdminDoc',
@@ -95,6 +96,8 @@ export default defineComponent({
     const param = ref();
     param.value = {}
 
+    const deleteIds: Array<String> = [];
+    const deleteNames: Array<String> = [];
 
     const loading = ref(false);
 
@@ -168,30 +171,70 @@ export default defineComponent({
       });
     };
 
+
     /**
-     *将某一节点的子节点增加disabled属性
+     * 将某节点及其子孙节点全部置为disabled
      */
-    const setDisabled = (treeSelectData: any, id: any) => {
+    const setDisable = (treeSelectData: any, id: any) => {
+      // console.log(treeSelectData, id);
+      // 遍历数组，即遍历某一层节点
       for (let i = 0; i < treeSelectData.length; i++) {
         const node = treeSelectData[i];
-        if (node.id == id) {
+        if (node.id === id) {
+          // 如果当前节点就是目标节点
+          // console.log("disabled", node);
+          // 将目标节点设置为disabled
           node.disabled = true;
 
+          // 遍历所有子节点，将所有子节点全部都加上disabled
           const children = node.children;
-          if (Tool.isEmpty(children)) {
-            for (let j=0;j<children.length;j++) {
-              setDisabled(children,children[j].id);
+          if (Tool.isNotEmpty(children)) {
+            for (let j = 0; j < children.length; j++) {
+              setDisable(children, children[j].id)
             }
           }
-        }else {
+        } else {
+          // 如果当前节点不是目标节点，则到其子节点再找找看。
           const children = node.children;
-          if (Tool.isEmpty(children)) {
-            setDisabled(children, id);
+          if (Tool.isNotEmpty(children)) {
+            setDisable(children, id);
           }
         }
       }
     };
 
+    // const ids: Array<String> = [];
+    /**
+     *查找整个文档树枝
+     */
+    const getDeleteIds = (treeSelectData: any, id: any) => {
+      // console.log(treeSelectData, id);
+      // 遍历数组，即遍历某一层节点
+      for (let i = 0; i < treeSelectData.length; i++) {
+        const node = treeSelectData[i];
+        if (node.id === id) {
+          // 如果当前节点就是目标节点，将ID放入结果集
+
+          // ids.push(node.id);
+
+          deleteIds.push(node.id);
+          deleteNames.push(node.name);
+          // 遍历所有子节点
+          const children = node.children;
+          if (Tool.isNotEmpty(children)) {
+            for (let j = 0; j < children.length; j++) {
+              getDeleteIds(children, children[j].id)
+            }
+          }
+        } else {
+          // 如果当前节点不是目标节点，则到其子节点再找找看。
+          const children = node.children;
+          if (Tool.isNotEmpty(children)) {
+            getDeleteIds(children, id);
+          }
+        }
+      }
+    };
 
     /**
      * 编辑
@@ -202,7 +245,7 @@ export default defineComponent({
       doc.value = Tool.copy(record);
 
       treeSelectData.value = Tool.copy(level1.value)
-      setDisabled(treeSelectData.value, record.id);
+      setDisable(treeSelectData.value, record.id);
 
       treeSelectData.value.unshift({id: 0, name: '无'})
     };
@@ -213,23 +256,44 @@ export default defineComponent({
     const add = () => {
       modalVisible.value = true;
       doc.value = {
-        ebookId:router.query.ebookId,
+        ebookId: router.query.ebookId,
       };
       treeSelectData.value = Tool.copy(level1.value)
       treeSelectData.value.unshift({id: 0, name: '无'})
 
     };
 
+    /**
+     * 删除
+     * @param id
+     */
     const handleDelete = (id: number) => {
-      axios.delete("/doc/delete/" + id).then((response) => {
-        const data = response.data;//data=commonResp
 
-        if (data.success) {
+      // 清空数组，否则多次删除时，数组会一直增加
+      deleteIds.length = 0;
+      deleteNames.length = 0;
+      getDeleteIds(level1.value, id);
 
-          //重新加载数据
-          handleQuery();
-        }
-      });
+      Modal.confirm(
+          {
+            title: '确定删除吗？',
+            icon: createVNode(ExclamationCircleOutlined),
+            content: '将删除：【' + deleteNames.join("，") + "】删除后不可恢复！确认删除？",
+            okText() {
+              axios.delete("/doc/delete/" + deleteIds.join(",")).then((response) => {
+                const data = response.data;//data=commonResp
+
+                if (data.success) {
+
+                  //重新加载数据
+                  handleQuery();
+                }
+              });
+            },
+            okType: 'danger',
+            centered: true
+          }
+      )
     }
 
 
