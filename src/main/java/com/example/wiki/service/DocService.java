@@ -137,4 +137,9 @@ public class DocService {
         // 如果查询到内容，则返回该Content对象的内容字段值
         return content.getContent();
     }
+
+    public String findContent(long id){
+        Content content = contentMapper.selectByPrimaryKey(id);
+        return content.getContent();
+    }
 }

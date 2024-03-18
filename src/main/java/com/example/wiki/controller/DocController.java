@@ -56,12 +56,12 @@ public class DocController {
         }
         return resp;
     }
-//    @GetMapping("/find_content")
-//    public CommonResp find_content(@PathVariable Long id) {
-//        CommonResp<String> resp = new CommonResp<>();
-//        String content = docService.find_content(id);
-//        resp.setContent(content);
-//        return resp;
-//    }
+    @GetMapping("/find_content/{id}")
+    public CommonResp find_content(@PathVariable Long id) {
+        CommonResp<String> resp = new CommonResp<>();
+        String content = docService.find_content(id);
+        resp.setContent(content);
+        return resp;
+    }
 
 }

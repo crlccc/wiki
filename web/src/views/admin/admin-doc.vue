@@ -30,7 +30,7 @@
               :defaultExpandAllRows="true"
           >
             <template #name="{ text, record }">
-              {{record.sort}} {{text}}
+              {{ record.sort }} {{ text }}
             </template>
             <template v-slot:action="{ text, record }">
               <a-space size="small">
@@ -101,7 +101,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, createVNode } from 'vue';
+import {defineComponent, onMounted, ref, createVNode} from 'vue';
 import axios from 'axios';
 import {message, Modal} from 'ant-design-vue';
 import {Tool} from "@/util/tool";
@@ -129,12 +129,12 @@ export default defineComponent({
       {
         title: '名称',
         dataIndex: 'name',
-        slots: { customRender: 'name' }
+        slots: {customRender: 'name'}
       },
       {
         title: 'Action',
         key: 'action',
-        slots: { customRender: 'action' }
+        slots: {customRender: 'action'}
       }
     ];
 
@@ -193,8 +193,8 @@ export default defineComponent({
         modalLoading.value = false;
         const data = response.data; // data = commonResp
         if (data.success) {
-          modalVisible.value = false;
-
+          // modalVisible.value = false;
+          message.success("保存成功！");
           // 重新加载列表
           handleQuery();
         } else {
@@ -270,12 +270,28 @@ export default defineComponent({
     };
 
     /**
+     * 查询富文本内容
+     */
+    const handleQueryContent = () => {
+      axios.get("doc/find_content/" + doc.value.id).then((response) => {
+        const data = response.data;
+        if (data.success) {
+          editor.txt.html(data.content);
+        } else {
+          message.error(data.message);
+        }
+      });
+    };
+
+    /**
      * 编辑
      */
     const edit = (record: any) => {
+      //清空富文本内容
+      editor.txt.html("");
       modalVisible.value = true;
       doc.value = Tool.copy(record);
-
+      handleQueryContent();
       // 不能选择当前节点及其所有子孙节点，作为父节点，会使树断开
       treeSelectData.value = Tool.copy(level1.value);
       setDisable(treeSelectData.value, record.id);
