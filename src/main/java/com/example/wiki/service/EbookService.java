@@ -11,6 +11,7 @@ import com.example.wiki.util.CopyUtil;
 import com.example.wiki.util.SnowFlake;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.mysql.cj.log.Log;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +37,10 @@ public class EbookService {
         if (!ObjectUtils.isEmpty(req.getName())) {
             criteria.andNameLike("%" + req.getName() + "%");
         }
+
+//        LOG.info("categoryId2=", req.getCategoryId2());
         if (!ObjectUtils.isEmpty(req.getCategoryId2())) {
-            criteria.andCategory2IdEqualTo(Long.valueOf(req.getCategoryId2()));
+            criteria.andCategory2IdEqualTo(req.getCategoryId2());
         }
         PageHelper.startPage(req.getPage(), req.getSize());
         List<Ebook> ebookList = ebookMapper.selectByExample(ebookExample);

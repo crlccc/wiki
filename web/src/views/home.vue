@@ -12,7 +12,7 @@
           <MailOutlined/>
           <span>欢迎</span>
         </a-menu-item>
-        <a-sub-menu v-for="item in level1" :key="item.id" >
+        <a-sub-menu v-for="item in level1" :key="item.id">
           <template v-slot:title>
               <span>
                 <user-outlined/>
@@ -29,7 +29,8 @@
       <div class="welcome" v-show="isShowWelcome">
         <h1>欢迎使用大菜狗的知识网站</h1>
       </div>
-      <a-list v-show="!isShowWelcome" item-layout="vertical" size="large" :grid="{ gutter: 50, column: 3 }" :data-source="ebooks" >
+      <a-list v-show="!isShowWelcome" item-layout="vertical" size="large" :grid="{ gutter: 50, column: 3 }"
+              :data-source="ebooks">
         <template #renderItem="{ item }">
           <a-list-item key="item.name">
             <template #actions>
@@ -40,7 +41,9 @@
             </template>
             <a-list-item-meta :description="item.description">
               <template #title>
-                <a :href="item.href">{{ item.name }}</a>
+                <router-link :to="'/doc?ebookId=' + item.id">
+                  {{ item.name }}
+                </router-link>
               </template>
               <template #avatar>
                 <a-avatar :src="item.cover"/>
@@ -81,15 +84,12 @@ export default defineComponent({
     let categoryId2 = 0;
 
 
-
-
-
     const handleQueryEbook = () => {
       axios.get("/ebook/list", {
         params: {
           page: 1,
           size: 1000,
-          categoryId2:categoryId2
+          categoryId2: categoryId2
         }
       }).then((response) => {
         const data = response.data;
@@ -124,8 +124,9 @@ export default defineComponent({
       // console.log("menu click")
       if (value.key === "welcome") {
         isShowWelcome.value = true;
-      }else {
+      } else {
         categoryId2 = value.key;
+        console.log("categoryId2=", categoryId2);
         isShowWelcome.value = false;
         handleQueryEbook();
       }

@@ -55,8 +55,11 @@
           <p>
             <a-form layout="inline" :model="param">
               <a-form-item>
-                <a-button type="primary" @click="handleSave()">
+                <a-button type="primary" @click="handleSave()" class="button-class">
                   保存
+                </a-button>
+                <a-button type="primary" @click="handlePreviewContent()">
+                  <EyeOutlined /> 内容预览
                 </a-button>
               </a-form-item>
             </a-form>
@@ -86,7 +89,9 @@
           </a-form>
         </a-col>
       </a-row>
-
+      <a-drawer width="900" placement="right" :closable="false" :visible="drawerVisible" @close="onDrawerClose">
+        <div class="wangeditor" :innerHTML="previewHtml"></div>
+      </a-drawer>
     </a-layout-content>
   </a-layout>
 
@@ -124,7 +129,9 @@ export default defineComponent({
     param.value = {};
     const docs = ref();
     const loading = ref(false);
-
+    // 因为树选择组件的属性状态，会随当前编辑的节点而变化，所以单独声明一个响应式变量
+    const treeSelectData = ref();
+    treeSelectData.value = [];
     const columns = [
       {
         title: '名称',
@@ -159,7 +166,7 @@ export default defineComponent({
       loading.value = true;
       // 如果不清空现有数据，则编辑保存重新加载数据后，再点编辑，则列表显示的还是编辑前的数据
       level1.value = [];
-      axios.get("/doc/all").then((response) => {
+      axios.get("/doc/all/"+route.query.ebookId).then((response) => {
         loading.value = false;
         const data = response.data;
         if (data.success) {
@@ -169,6 +176,11 @@ export default defineComponent({
           level1.value = [];
           level1.value = Tool.array2Tree(docs.value, 0);
           console.log("树形结构：", level1);
+
+          //富文档初始化
+          treeSelectData.value = Tool.copy(level1.value) || [];
+          treeSelectData.value.unshift({id:0,name:"无"});
+
         } else {
           message.error(data.message);
         }
@@ -176,11 +188,12 @@ export default defineComponent({
     };
 
     // -------- 表单 ---------
-    // 因为树选择组件的属性状态，会随当前编辑的节点而变化，所以单独声明一个响应式变量
-    const treeSelectData = ref();
-    treeSelectData.value = [];
+
     const doc = ref();
-    doc.value = {};
+    doc.value = {
+      ebookId: route.query.ebookId
+
+    };
     const modalVisible = ref(false);
     const modalLoading = ref(false);
     const editor = new E('#content');
@@ -338,6 +351,18 @@ export default defineComponent({
       });
     };
 
+    // ----------------富文本预览--------------
+    const drawerVisible = ref(false);
+    const previewHtml = ref();
+    const handlePreviewContent = () => {
+      const html = editor.txt.html();
+      previewHtml.value = html;
+      drawerVisible.value = true;
+    };
+    const onDrawerClose = () => {
+      drawerVisible.value = false;
+    };
+
     onMounted(() => {
       handleQuery();
 
@@ -361,8 +386,13 @@ export default defineComponent({
       handleSave,
 
       handleDelete,
+      treeSelectData,
 
-      treeSelectData
+      drawerVisible,
+      previewHtml,
+      handlePreviewContent,
+      onDrawerClose,
+
     }
   }
 });
@@ -373,4 +403,8 @@ img {
   width: 50px;
   height: 50px;
 }
+.button-class{
+  margin-right: 15px;
+}
+
 </style>
