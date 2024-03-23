@@ -31,7 +31,9 @@
       >
         <template v-slot:action="{ text, record }">
           <a-space size="small">
-            <a-button type="primary" @click="edit(record)">
+            <a-button type="primary" @click="restPassword(record)">
+              重置密码
+            </a-button><a-button type="primary" @click="edit(record)">
               编辑
             </a-button>
             <a-popconfirm
@@ -58,12 +60,25 @@
   >
     <a-form :model="user" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
       <a-form-item label="登陆名">
-        <a-input v-model:value="user.loginName" />
+        <a-input v-model:value="user.loginName" :disabled="!!user.id"/>
       </a-form-item>
       <a-form-item label="昵称">
         <a-input v-model:value="user.name" />
       </a-form-item>
-      <a-form-item label="密码">
+      <a-form-item label="密码" v-show="!user.id">
+        <a-input v-model:value="user.password" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
+
+  <a-modal
+      title="重置密码"
+      v-model:visible="restModalVisible"
+      :confirm-loading="restModalLoading"
+      @ok="handleRestModalOk"
+  >
+    <a-form :model="user" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+      <a-form-item label="新密码">
         <a-input v-model:value="user.password" />
       </a-form-item>
     </a-form>
@@ -75,6 +90,9 @@ import { defineComponent, onMounted, ref } from 'vue';
 import axios from 'axios';
 import { message } from 'ant-design-vue';
 import {Tool} from "@/util/tool";
+
+declare let hexMd5:any;
+declare let KEY:any;
 
 export default defineComponent({
   name: 'AdminUser',
@@ -154,6 +172,7 @@ export default defineComponent({
     const modalLoading = ref(false);
     const handleModalOk = () => {
       modalLoading.value = true;
+      user.value.password =hexMd5(user.value.password + KEY);
       axios.post("/user/save", user.value).then((response) => {
         modalLoading.value = false;
         const data = response.data; // data = commonResp
@@ -200,6 +219,39 @@ export default defineComponent({
       });
     };
 
+    // -------- 重置密码 ---------
+    const restModalVisible = ref(false);
+    const restModalLoading = ref(false);
+    const handleRestModalOk = () => {
+      restModalLoading.value = true;
+      user.value.password =hexMd5(user.value.password + KEY);
+      axios.post("/user/save", user.value).then((response) => {
+        restModalLoading.value = false;
+        const data = response.data; // data = commonResp
+        if (data.success) {
+          restModalVisible.value = false;
+
+          // 重新加载列表
+          handleQuery({
+            page: pagination.value.current,
+            size: pagination.value.pageSize,
+          });
+        } else {
+          message.error(data.message);
+        }
+      });
+    };
+
+    /**
+     * 重置密码
+     */
+    const restPassword = (record: any) => {
+      restModalVisible.value = true;
+      user.value = Tool.copy(record);
+      user.value.password = null;
+    };
+
+
     onMounted(() => {
       handleQuery({
         page: 1,
@@ -224,7 +276,12 @@ export default defineComponent({
       modalLoading,
       handleModalOk,
 
-      handleDelete
+      handleDelete,
+
+      restModalVisible,
+      restModalLoading,
+      handleRestModalOk,
+      restPassword,
     }
   }
 });

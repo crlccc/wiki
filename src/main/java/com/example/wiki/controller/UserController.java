@@ -1,6 +1,7 @@
 package com.example.wiki.controller;
 
 
+import com.example.wiki.req.UserPasswordReq;
 import com.example.wiki.req.UserQueryReq;
 import com.example.wiki.req.UserSaveReq;
 import com.example.wiki.resp.CommonResp;
@@ -40,6 +41,13 @@ public class UserController {
     public CommonResp delete(@PathVariable long id) {
         CommonResp resp = new CommonResp<>();
         userService.delete(id);
+        return resp;
+    }
+
+    @PostMapping("/rest-password")
+    public CommonResp restPassword(@Valid @RequestBody UserPasswordReq req) {
+        CommonResp resp = new CommonResp<>();
+        userService.restPassword(req);
         return resp;
     }
 

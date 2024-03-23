@@ -3,12 +3,9 @@ package com.example.wiki.req;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
-public class UserSaveReq {
+public class UserPasswordReq {
     private Long id;
-    @NotNull(message = "【用户名】不能为空")
-    private String loginName;
-    @NotNull(message = "【昵称】不能为空")
-    private String name;
+
     @NotNull(message = "【密码】不能为空")
     @Pattern(regexp = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,32}$", message = "【密码】至少包含 数字和英文，长度6-32")
     private String password;
@@ -21,21 +18,6 @@ public class UserSaveReq {
         this.id = id;
     }
 
-    public String getLoginName() {
-        return loginName;
-    }
-
-    public void setLoginName(String loginName) {
-        this.loginName = loginName;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getPassword() {
         return password;
@@ -52,8 +34,6 @@ public class UserSaveReq {
         sb.append(" [");
         sb.append("Hash = ").append(hashCode());
         sb.append(", id=").append(id);
-        sb.append(", loginName=").append(loginName);
-        sb.append(", name=").append(name);
         sb.append(", password=").append(password);
         sb.append("]");
         return sb.toString();

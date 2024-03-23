@@ -5,6 +5,7 @@ import com.example.wiki.domain.UserExample;
 import com.example.wiki.exception.BusinessException;
 import com.example.wiki.exception.BusinessExceptionCode;
 import com.example.wiki.mapper.UserMapper;
+import com.example.wiki.req.UserPasswordReq;
 import com.example.wiki.req.UserQueryReq;
 import com.example.wiki.req.UserSaveReq;
 import com.example.wiki.resp.UserQueryResp;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
@@ -71,6 +73,7 @@ public class UserService {
      * 保存
      */
     public void save(UserSaveReq req) {
+        req.setPassword(DigestUtils.md5DigestAsHex(req.getPassword().getBytes()));
         User user = CopyUtil.copy(req, User.class);
         if (ObjectUtils.isEmpty(req.getId())) {
 
@@ -85,7 +88,9 @@ public class UserService {
             }
         } else {
             // 更新
-            userMapper.updateByPrimaryKey(user);
+            user.setLoginName(null);
+            user.setPassword(null);
+            userMapper.updateByPrimaryKeySelective(user);
         }
     }
 
@@ -103,4 +108,14 @@ public class UserService {
         }
         return userList.get(0);
     }
+
+    /**
+     * 修改密码
+     */
+    public void restPassword(UserPasswordReq req) {
+        req.setPassword(DigestUtils.md5DigestAsHex(req.getPassword().getBytes()));
+        User user = CopyUtil.copy(req, User.class);
+        userMapper.updateByPrimaryKeySelective(user);
+    }
+
 }
