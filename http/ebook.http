@@ -1,3 +1,8 @@
 
 GET http://localhost:8080/admin/category?name=spring
 ###
+
+###
+
+GET http://localhost:8081/ebook/save
+Content-Type: application/json

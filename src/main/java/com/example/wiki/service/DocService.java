@@ -3,13 +3,18 @@ package com.example.wiki.service;
 import com.example.wiki.domain.Content;
 import com.example.wiki.domain.Doc;
 import com.example.wiki.domain.DocExample;
+import com.example.wiki.exception.BusinessException;
+import com.example.wiki.exception.BusinessExceptionCode;
 import com.example.wiki.mapper.ContentMapper;
 import com.example.wiki.mapper.DocMapper;
+import com.example.wiki.mapper.DocMapperCust;
 import com.example.wiki.req.DocQueryReq;
 import com.example.wiki.req.DocSaveReq;
 import com.example.wiki.resp.DocQueryResp;
 import com.example.wiki.resp.PageResp;
 import com.example.wiki.util.CopyUtil;
+import com.example.wiki.util.RedisUtil;
+import com.example.wiki.util.RequestContext;
 import com.example.wiki.util.SnowFlake;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -31,7 +36,13 @@ public class DocService {
     private ContentMapper contentMapper;
 
     @Resource
+    private DocMapperCust docMapperCust;
+
+    @Resource
     private SnowFlake snowFlake;
+
+    @Resource
+    public RedisUtil redisUtil;
 
     private static final Logger log = LoggerFactory.getLogger(DocService.class);
 
@@ -90,6 +101,8 @@ public class DocService {
         if (ObjectUtils.isEmpty(req.getId())) {
             // 新增
             doc.setId(snowFlake.nextId());
+            doc.setViewCount(0);
+            doc.setVoteCount(0);
             docMapper.insert(doc);
 
             content.setId(doc.getId());
@@ -121,10 +134,12 @@ public class DocService {
     /**
      * 查询内容
      */
-    public String find_content(Long id) {
+    public String findContent(Long id) {
         // 使用contentMapper，这是一个继承自MyBatis等ORM框架接口的对象
         // 调用其selectByPrimaryKey方法，根据主键id从数据库中查询Content实体类的一个实例
         Content content = contentMapper.selectByPrimaryKey(id);
+        //阅读文档数+1
+        docMapperCust.increaseViewCount(id);
 
         // 判断查询结果是否为空。ObjectUtils.isEmpty() 是Apache Commons Lang库中的一个方法，
         // 如果content为null或者其所有属性都为空，则认为内容不存在于数据库中。
@@ -137,8 +152,26 @@ public class DocService {
         return content.getContent();
     }
 
-    public String findContent(long id){
-        Content content = contentMapper.selectByPrimaryKey(id);
-        return content.getContent();
+    //点赞
+    public void vote(Long id){
+        //远程IP+doc.id作为KEY，24小时不能重复
+        String ip = RequestContext.getRemoteAddr();
+        if(redisUtil.validateRepeat("DOC_VOTE_" + id + "_" + ip, 3600 * 24)){
+            docMapperCust.increaseVoteCount(id);
+        }else {
+
+            throw new BusinessException(BusinessExceptionCode.VOTE_REPEAT);
+        }
     }
+
+    //定时器
+    public void updateEbookInfo(){
+        docMapperCust.updateEbookInfo();
+    }
+
+
+//    public String findContent(long id){
+//        Content content = contentMapper.selectByPrimaryKey(id);
+//        return content.getContent();
+//    }
 }

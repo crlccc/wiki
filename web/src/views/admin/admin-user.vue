@@ -225,7 +225,7 @@ export default defineComponent({
     const handleRestModalOk = () => {
       restModalLoading.value = true;
       user.value.password =hexMd5(user.value.password + KEY);
-      axios.post("/user/save", user.value).then((response) => {
+      axios.post("/user/reset-password", user.value).then((response) => {
         restModalLoading.value = false;
         const data = response.data; // data = commonResp
         if (data.success) {
