@@ -27,7 +27,7 @@
         :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
     >
       <div class="welcome" v-show="isShowWelcome">
-        <h1>欢迎使用大菜狗的知识网站</h1>
+        <the-welcome></the-welcome>
       </div>
       <a-list v-show="!isShowWelcome" item-layout="vertical" size="large" :grid="{ gutter: 50, column: 3 }"
               :data-source="ebooks">
@@ -81,12 +81,14 @@ import defaultProps from "ant-design-vue/es/vc-slick/default-props";
 import responsive = defaultProps.responsive;
 import {Tool} from "@/util/tool";
 import {message} from "ant-design-vue";
+import TheWelcome from "@/components/the-welcome.vue";
 
 
 export default defineComponent({
   name: 'Home',
   methods: {UserOutlined, LikeOutlined, UserAddOutlined, FileOutlined},
   components: {
+    TheWelcome,
     LaptopOutlined,
   },
   setup() {
