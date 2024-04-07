@@ -2,7 +2,9 @@ package com.example.wiki.resp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import java.lang.ref.Cleaner;
 import java.util.Date;
+import java.util.List;
 
 public class StatisticResp {
 
@@ -67,4 +69,6 @@ public class StatisticResp {
                 ", voteIncrease=" + voteIncrease +
                 '}';
     }
+
+
 }

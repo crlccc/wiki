@@ -1,11 +1,11 @@
 <template>
   <a-layout-header class="header">
-    <div class="logo"/>
+    <div class="logo">大菜狗知识网站</div>
     <a class="login-menu" v-show="user.id" @click="logout">
       <span>退出登录</span>
     </a>
     <a class="login-menu" v-show="user.id" style="margin-right: 20px">
-      <span>您好：{{user.name}}</span>
+      <span>您好：{{ user.name }}</span>
     </a>
     <a class="login-menu" v-show="!user.id" @click="showLoginModal">
       <span>登录</span>
@@ -58,7 +58,6 @@ import axios from "axios";
 import {message} from "ant-design-vue";
 import store from "@/store";
 import router from "@/router";
-
 
 
 declare let hexMd5: any;
@@ -139,6 +138,17 @@ export default defineComponent({
 .login-menu {
   float: right;
   color: white;
+}
+
+.logo {
+  width: 120px;
+  height: 31px;
+  /*background: rgba(255, 255, 255, 0.2);*/
+  /*margin: 16px 28px 16px 0;*/
+  float: left;
+  color: white;
+  font-size: 18px;
+
 }
 </style>
 

@@ -1,4 +1,4 @@
-package com.example.wiki.config;
+package com.example.wiki.controller;
 
 import com.example.wiki.resp.CommonResp;
 import com.example.wiki.resp.StatisticResp;
@@ -18,8 +18,16 @@ public class EbookSnapshotController {
     private EbookSnapshotService ebookSnapshotService;
 
     @GetMapping("/get-statistic")
-    public CommonResp getStatistic(){
+    public CommonResp getStatistic() {
         List<StatisticResp> statisticResp = ebookSnapshotService.getStatistic();
+        CommonResp<List<StatisticResp>> commonResp = new CommonResp<>();
+        commonResp.setContent(statisticResp);
+        return commonResp;
+    }
+
+    @GetMapping("/get-30-statistic")
+    public CommonResp get30Statistic() {
+        List<StatisticResp> statisticResp = ebookSnapshotService.get30Statistic();
         CommonResp<List<StatisticResp>> commonResp = new CommonResp<>();
         commonResp.setContent(statisticResp);
         return commonResp;
