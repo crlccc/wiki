@@ -7,8 +7,5 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(classes = WikiApplication.class)
 class WikiApplicationTests {
 
-    @Test
-    void contextLoads() {
-    }
 
 }

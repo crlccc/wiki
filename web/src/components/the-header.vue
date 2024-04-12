@@ -1,6 +1,6 @@
 <template>
   <a-layout-header class="header">
-    <div class="logo">大菜狗知识网站</div>
+    <div class="logo">树上一只啾的知识网站</div>
     <a class="login-menu" v-show="user.id" @click="logout">
       <span>退出登录</span>
     </a>
@@ -141,7 +141,7 @@ export default defineComponent({
 }
 
 .logo {
-  width: 120px;
+  width: 190px;
   height: 31px;
   /*background: rgba(255, 255, 255, 0.2);*/
   /*margin: 16px 28px 16px 0;*/

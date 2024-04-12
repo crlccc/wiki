@@ -198,7 +198,7 @@ export default defineComponent({
     const modalLoading = ref(false);
     const editor = new E('#content');
     editor.config.zIndex = 0;
-
+    editor.config.uploadImgShowBase64 = true;
     const handleSave = () => {
       modalLoading.value = true;
       doc.value.content = editor.txt.html();
@@ -286,7 +286,7 @@ export default defineComponent({
      * 查询富文本内容
      */
     const handleQueryContent = () => {
-      axios.get("doc/find_content/" + doc.value.id).then((response) => {
+      axios.get("doc/find-content/" + doc.value.id).then((response) => {
         const data = response.data;
         if (data.success) {
           editor.txt.html(data.content);
@@ -317,6 +317,8 @@ export default defineComponent({
      * 新增
      */
     const add = () => {
+      //清空富文本内容
+      editor.txt.html("");
       modalVisible.value = true;
       doc.value = {
         ebookId: route.query.ebookId
@@ -345,6 +347,8 @@ export default defineComponent({
             if (data.success) {
               // 重新加载列表
               handleQuery();
+            }else {
+              message.error(data.message);
             }
           });
         },

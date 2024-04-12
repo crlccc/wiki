@@ -1,6 +1,6 @@
 <template>
   <a-layout-footer style="text-align: center">
-    大菜狗的知识网站 ©2021 Created by 大菜狗
+    树上一只啾的知识网站 ©2021 Created by 树上一只啾
     <a v-show="user.id">欢迎：{{user.name}}</a>
   </a-layout-footer>
 

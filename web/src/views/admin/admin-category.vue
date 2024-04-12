@@ -64,7 +64,7 @@
             ref="select"
             v-model:value="category.parent"
         >
-          <a-select-option value="0">无</a-select-option>
+          <a-select-option :value="0">无</a-select-option>
           <a-select-option v-for="c in level1" :value="c.id" :key="c.id" :disabled="category.id === c.id">{{c.name}}</a-select-option>
         </a-select>
       </a-form-item>
@@ -99,11 +99,11 @@ export default defineComponent({
         title: '名称',
         dataIndex: 'name'
       },
-      {
-        title: '父分类',
-        key: 'parent',
-        dataIndex: 'parent'
-      },
+      // {
+      //   title: '父分类',
+      //   key: 'parent',
+      //   dataIndex: 'parent'
+      // },
       {
         title: '顺序',
         dataIndex: 'sort'
@@ -184,6 +184,8 @@ export default defineComponent({
 
           //重新加载数据
           handleQuery();
+        }else {
+          message.error(data.message);
         }
       });
     }

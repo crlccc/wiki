@@ -9,15 +9,21 @@ import com.example.wiki.resp.PageResp;
 import com.example.wiki.service.EbookService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
 
 
 @RestController
 @RequestMapping("/ebook")
 @Validated
 public class EbookController {
-
+    private static final Logger LOG = LoggerFactory.getLogger(EbookController.class);
     @Resource
     private EbookService ebookService;
 
@@ -41,6 +47,21 @@ public class EbookController {
         CommonResp resp = new CommonResp<>();
         ebookService.delete(id);
         return resp;
+    }
+    @RequestMapping("/upload/avatar")
+    public CommonResp upload(@RequestParam MultipartFile avatar) throws IOException {
+        LOG.info("上传文件开始：{}", avatar);
+        LOG.info("文件名：{}", avatar.getOriginalFilename());
+        LOG.info("文件大小：{}", avatar.getSize());
+
+        // 保存文件到本地
+        String fileName = avatar.getOriginalFilename();
+        String fullPath = "/www/wiki/dist/image/" + fileName;
+        File dest = new File(fullPath);
+        avatar.transferTo(dest);
+        LOG.info(dest.getAbsolutePath());
+
+        return new CommonResp();
     }
 
 }
